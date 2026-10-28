@@ -33,6 +33,6 @@ gh workflow run publish-package.yml \
 
 Stable tags update `key`; numbered alpha, beta, and rc tags update the corresponding Preview cask. The workflow verifies exact assets, archive checksums and GitHub digests, audits the candidate, and proposes one cask change through a pull request. Historical releases without `checksums.txt` do not satisfy this newer publication contract; publish a new qualified version rather than replacing their assets.
 
-The repository setting **Allow GitHub Actions to create and approve pull requests** must be enabled for the proposal job. Keep the default workflow token permission read-only. Workflow-generated PR checks require manual approval before running.
+Before dispatching publication, allow GitHub Actions to create pull requests in the organization’s Actions settings, then enable the repository setting **Allow GitHub Actions to create and approve pull requests** for the proposal job. At setup, the inherited organization policy blocked this repository setting; an organization owner must enable it. Keep the default workflow token permission read-only. Workflow-generated PR checks require manual approval before running.
 
 Casks and publication tooling originated in [tvanreenen/homebrew-tap](https://github.com/tvanreenen/homebrew-tap/tree/d7067814958c452aaa55442f1a74cb9cf22ec6bb) and are maintained here for Key.
