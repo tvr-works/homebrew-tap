@@ -1,3 +1,7 @@
+self-hosted-runner:
+  labels:
+    - blacksmith-4vcpu-ubuntu-2404
+    - blacksmith-6vcpu-macos-26
 # GitHub Actions supports concurrency.queue, but actionlint 1.7.12 does not yet
 # include it in its workflow schema. Homebrew invokes actionlint with both
 # repository-relative and physical tap paths, so cover both while keeping the

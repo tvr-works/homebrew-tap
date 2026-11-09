@@ -3,12 +3,19 @@ name: Homebrew checks
 on:
   pull_request:
     paths:
+      - "Formula/**"
       - "Casks/**"
       - ".github/**"
       - "tests/**"
+  push:
+    branches: ["codex/**"]
   workflow_dispatch:
 
 permissions: {}
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   test:
@@ -41,9 +48,51 @@ jobs:
         working-directory: ${{ steps.homebrew.outputs.repository-path }}
         run: brew audit --strict --online --tap=tvr-works/tap --except=github_prerelease_version
 
+  xkcdpass:
+    name: Install xkcdpass (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [blacksmith-4vcpu-ubuntu-2404, blacksmith-6vcpu-macos-26]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - id: homebrew
+        uses: Homebrew/actions/setup-homebrew@8f3d1ec8a696b3b9d9a6c3696b6c73033cab69e4 # 2026.08.14.1
+        with:
+          core: false
+          cask: false
+          stable: true
+      - name: Install published archive and test runtime
+        working-directory: ${{ steps.homebrew.outputs.repository-path }}
+        env:
+          HOMEBREW_NO_INSTALL_FROM_API: '1'
+        run: |
+          brew install --build-from-source tvr-works/tap/xkcdpass 2>&1 | tee "${RUNNER_TEMP}/xkcdpass-install.log"
+          brew test tvr-works/tap/xkcdpass 2>&1 | tee "${RUNNER_TEMP}/xkcdpass-test.log"
+          brew uninstall tvr-works/tap/xkcdpass
+      - name: Verify canonical release metadata and both archives
+        if: runner.os == 'macOS'
+        working-directory: ${{ steps.homebrew.outputs.repository-path }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="v$(brew info --json=v2 tvr-works/tap/xkcdpass | jq -r '.formulae[0].versions.stable')"
+          .github/scripts/prepare-package-update.sh xkcdpass "${version}" "${RUNNER_TEMP}/verified-package-outputs"
+      - name: Save Homebrew failure evidence
+        if: failure() && !cancelled()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: homebrew-failure-${{ runner.os }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/xkcdpass-*.log
+          if-no-files-found: ignore
+          retention-days: 7
+
   publication:
     name: Test release verification
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 5
     permissions:
       contents: read
