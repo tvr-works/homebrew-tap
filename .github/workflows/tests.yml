@@ -8,7 +8,7 @@ on:
       - ".github/**"
       - "tests/**"
   push:
-    branches: ["codex/**"]
+    branches: ["**"]
   workflow_dispatch:
 
 permissions: {}
