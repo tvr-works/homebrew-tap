@@ -61,6 +61,14 @@ jobs:
     permissions:
       contents: read
     steps:
+      - name: Prepare Homebrew ownership on the ephemeral Linux runner
+        if: runner.os == 'Linux'
+        run: |
+          # Blacksmith's image includes Homebrew owned by a different image user.
+          # Repair only this job VM's fixed prefix before setup-homebrew updates it.
+          if [[ -d /home/linuxbrew/.linuxbrew ]]; then
+            sudo chown -R "$(id -u):$(id -g)" /home/linuxbrew/.linuxbrew
+          fi
       - id: homebrew
         uses: Homebrew/actions/setup-homebrew@8f3d1ec8a696b3b9d9a6c3696b6c73033cab69e4 # 2026.08.14.1
         with:
