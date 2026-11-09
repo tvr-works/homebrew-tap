@@ -2,11 +2,6 @@ name: Homebrew checks
 
 on:
   pull_request:
-    paths:
-      - "Formula/**"
-      - "Casks/**"
-      - ".github/**"
-      - "tests/**"
   push:
     branches: ["**"]
   workflow_dispatch:
