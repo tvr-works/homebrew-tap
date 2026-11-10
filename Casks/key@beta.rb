@@ -1,6 +1,6 @@
 cask "key@beta" do
-  version "v0.2.0-beta.1"
-  sha256 "8216afea14a4de764b0b844f2c6ff30c035b0ce7eb510bece7f02aa8e81b5b64"
+  version "v0.3.0-beta.1"
+  sha256 "3f21f2edee96dd4867ef2634e72377e5220aa8021bb029ab40d2f7563bbbb6b0"
 
   url "https://github.com/tvr-works/key/releases/download/#{version}/Key-Preview-#{version}.zip"
   name "Key Preview"
