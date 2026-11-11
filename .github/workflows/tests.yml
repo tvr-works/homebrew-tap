@@ -45,6 +45,33 @@ jobs:
           brew audit --cask --strict --online --tap=tvr-works/tap --except=github_prerelease_version
           brew audit --strict --online tvr-works/tap/xkcdpass
 
+      - name: Verify the published Frame archive and publisher identity
+        working-directory: ${{ steps.homebrew.outputs.repository-path }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="v$(brew info --json=v2 --cask tvr-works/tap/frame | jq -r '.casks[0].version')"
+          .github/scripts/prepare-package-update.sh frame "$version" "$RUNNER_TEMP/frame-verified-outputs"
+
+      - name: Qualify Frame installation and legacy receipt migration
+        working-directory: ${{ steps.homebrew.outputs.repository-path }}
+        env:
+          GH_TOKEN: ''
+          HOMEBREW_GITHUB_API_TOKEN: ''
+        run: .github/scripts/test-frame-migration.sh
+
+      - name: Retain Frame migration evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frame-migration-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/frame-migration-report.txt
+            ${{ runner.temp }}/frame-interrupted-*.log
+            ${{ runner.temp }}/frame-legacy-resolution.json
+          if-no-files-found: ignore
+          retention-days: 7
+
   xkcdpass:
     name: Install xkcdpass (${{ matrix.os }})
     strategy:
