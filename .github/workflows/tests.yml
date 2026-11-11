@@ -99,9 +99,10 @@ jobs:
           stable: true
       - name: Install published archive and test runtime
         working-directory: ${{ steps.homebrew.outputs.repository-path }}
-        env:
-          HOMEBREW_NO_INSTALL_FROM_API: '1'
         run: |
+          # Keep the core API available; disabling it forces a full core Git clone.
+          # The fully qualified name must still select this tap's local formula.
+          brew info --json=v2 tvr-works/tap/xkcdpass | jq -e '.formulae | length == 1 and .[0].tap == "tvr-works/tap"' >/dev/null
           brew install --build-from-source tvr-works/tap/xkcdpass 2>&1 | tee "${RUNNER_TEMP}/xkcdpass-install.log"
           brew test tvr-works/tap/xkcdpass 2>&1 | tee "${RUNNER_TEMP}/xkcdpass-test.log"
           brew uninstall tvr-works/tap/xkcdpass
