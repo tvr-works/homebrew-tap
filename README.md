@@ -19,7 +19,7 @@ Alpha, beta, and release-candidate casks share the Preview app identity, so inst
 
 ## Existing personal-tap installations
 
-The personal tap migration entries will direct `key`, `key@alpha`, and `key@beta` to `tvr-works/tap`. After that change is merged, run `brew update` and add the destination tap with `brew tap tvr-works/tap`. Use the fully qualified organization cask for future upgrades. Once xkcdpass migration is integrated, its existing installations also move to `tvr-works/tap`. Keep the personal tap if you use Frame. This repository migration does not change Key’s application identity or vault data.
+The personal tap migration entries direct existing tokens to `tvr-works/tap`. Run `brew update` and add the destination tap with `brew tap tvr-works/tap`, then use the fully qualified organization package for future upgrades. Retain the personal tap for its compatibility forwarding entries. This repository migration does not change Key’s application identity or vault data. Frame's cask receipt behavior is recorded below.
 
 ## Publishing updates
 
@@ -49,7 +49,7 @@ The required macOS audit job also exercises the preserved release and real Homeb
 
 The destination cask uses Homebrew's default quarantine handling. It does not copy the old personal cask's quarantine-removal workaround. The current release is not qualified as notarized; fresh-download first-launch Gatekeeper acceptance, Accessibility/login continuity, and a future genuinely newer-version upgrade remain separate distribution/device qualifications. CI signature checks and `--version` execution do not establish them.
 
-Keep the personal Frame cask until the destination checks and source dispatch route are integrated. Only then add `frame` to the personal tap's existing migration metadata and retire its old Frame publisher. Existing users should run `brew update`, add `tvr-works/tap`, approve tap trust if their Homebrew version requests it, and use `brew upgrade --cask tvr-works/tap/frame`. Same-version cask moves may retain the old installed receipt until an actual installation; an explicit `brew reinstall --cask tvr-works/tap/frame` can refresh the receipt, while the published app/CLI bytes remain unchanged. Reinstallation and first-launch acceptance must be considered separately on a real device; no uninstall or data deletion is part of the migration instructions.
+Keep the personal Frame cask until the destination checks and source dispatch route are integrated. Only then add `frame` to the personal tap's existing migration metadata and retire its old Frame publisher. Existing users should run `brew update`, add `tvr-works/tap`, approve tap trust if their Homebrew version requests it, and use `brew upgrade --cask tvr-works/tap/frame`. In [disposable macOS qualification](https://github.com/tvr-works/homebrew-tap/actions/runs/43119476695/attempts/2), the legacy token resolved to the organization cask, but the already-current `3.2.0` install retained its personal-tap receipt. An explicit same-version reinstall refreshed the receipt to `tvr-works/tap` and preserved app/CLI hashes; a fresh destination install also passed. Existing users can retain their current app until a genuine future upgrade instead of reinstalling solely to change receipt metadata. Reinstallation and first-launch acceptance must be considered separately on a real device; no uninstall or data deletion is part of the migration instructions.
 
 ## xkcdpass updates and migration
 
