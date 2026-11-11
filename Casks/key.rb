@@ -1,6 +1,6 @@
 cask "key" do
-  version "v0.3.0"
-  sha256 "a54f1cab91afc242000cf51125e2f8597b0552bfcf18a63407b5b068e2763213"
+  version "v0.3.1"
+  sha256 "93b5364fbfbfc1caf9e954f5d260b5fc5c8e55a2e583f525424e8cf89f11a131"
 
   url "https://github.com/tvr-works/key/releases/download/#{version}/Key-#{version}.zip"
   name "Key"
