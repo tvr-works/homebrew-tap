@@ -162,6 +162,9 @@ jobs:
             fi
           fi
 
+          .github/scripts/check-package-state.sh --exact \
+            "${KIND}" "${BREW_REF}" "${FORMULA_VERSION}" "${DOWNLOAD_URL}" "${SHA256}" \
+            "${RUNNER_TEMP}/candidate-selection"
           brew style --fix "${TAP_PATH}"
           changed_paths="$(git status --short | sed -E 's/^.. //')"
           if [[ -z "${changed_paths}" ]]; then
@@ -211,11 +214,7 @@ jobs:
           BREW_REF: ${{ steps.package.outputs.brew_ref }}
           GH_TOKEN: ""
           HOMEBREW_GITHUB_API_TOKEN: ""
-          HOMEBREW_NO_INSTALL_FROM_API: "1"
-        run: |
-          set -euo pipefail
-          brew install --cask "${BREW_REF}"
-          brew uninstall --cask "${BREW_REF}"
+        run: .github/scripts/test-package-install.sh cask "${BREW_REF}"
 
       - name: Install and test formula
         if: steps.candidate.outputs.changed == 'true' && steps.package.outputs.kind == 'formula'
@@ -224,11 +223,7 @@ jobs:
           BREW_REF: ${{ steps.package.outputs.brew_ref }}
           GH_TOKEN: ""
           HOMEBREW_GITHUB_API_TOKEN: ""
-          HOMEBREW_NO_INSTALL_FROM_API: "1"
-        run: |
-          brew install --build-from-source "${BREW_REF}"
-          brew test "${BREW_REF}"
-          brew uninstall "${BREW_REF}"
+        run: .github/scripts/test-package-install.sh formula "${BREW_REF}"
 
       - name: Upload the verified package patch
         if: steps.candidate.outputs.changed == 'true'

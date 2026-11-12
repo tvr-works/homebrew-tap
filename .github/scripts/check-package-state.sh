@@ -7,9 +7,15 @@ fail() {
   exit 1
 }
 
+exact=false
+if [[ "${1:-}" == --exact ]]; then
+  exact=true
+  shift
+fi
+
 if [[ $# -ne 6 ]]
 then
-  fail "usage: $0 <formula|cask> <brew-ref> <version> <url> <sha256> <output-file>"
+  fail "usage: $0 [--exact] <formula|cask> <brew-ref> <version> <url> <sha256> <output-file>"
 fi
 
 kind="$1"
@@ -34,13 +40,18 @@ then
   current_version="$(jq -er '.formulae[0].versions.stable' <<<"${package_json}")"
   current_url="$(jq -er '.formulae[0].urls.stable.url' <<<"${package_json}")"
   current_sha256="$(jq -er '.formulae[0].urls.stable.checksum' <<<"${package_json}")"
+  current_tap="$(jq -er '.formulae[0].tap' <<<"${package_json}")"
 else
   package_count="$(jq '.casks | length' <<<"${package_json}")"
   [[ "${package_count}" == "1" ]] || fail "expected one cask for ${brew_ref}"
   current_version="$(jq -er '.casks[0].version' <<<"${package_json}")"
   current_url="$(jq -er '.casks[0].url' <<<"${package_json}")"
   current_sha256="$(jq -er '.casks[0].sha256' <<<"${package_json}")"
+  current_tap="$(jq -er '.casks[0].tap' <<<"${package_json}")"
 fi
+
+[[ "${brew_ref}" == */*/* && "${current_tap}" == "${brew_ref%/*}" ]] ||
+  fail "${brew_ref} resolved to an unexpected tap: ${current_tap}"
 
 if [[ "${current_version}" == "${expected_version}" ]]
 then
@@ -51,6 +62,8 @@ then
   echo "current=true" >>"${output_file}"
   exit 0
 fi
+
+[[ "${exact}" == false ]] || fail "${brew_ref} selected ${current_version}, expected ${expected_version}"
 
 comparison="$(
   brew ruby -e '

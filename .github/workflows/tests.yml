@@ -53,6 +53,13 @@ jobs:
           version="v$(brew info --json=v2 --cask tvr-works/tap/frame | jq -r '.casks[0].version')"
           .github/scripts/prepare-package-update.sh frame "$version" "$RUNNER_TEMP/frame-verified-outputs"
 
+      - name: Qualify publisher installation and removal
+        working-directory: ${{ steps.homebrew.outputs.repository-path }}
+        env:
+          GH_TOKEN: ''
+          HOMEBREW_GITHUB_API_TOKEN: ''
+        run: .github/scripts/test-package-install.sh cask tvr-works/tap/frame
+
       - name: Qualify Frame installation and legacy receipt migration
         working-directory: ${{ steps.homebrew.outputs.repository-path }}
         env:
@@ -100,12 +107,7 @@ jobs:
       - name: Install published archive and test runtime
         working-directory: ${{ steps.homebrew.outputs.repository-path }}
         run: |
-          # Keep the core API available; disabling it forces a full core Git clone.
-          # The fully qualified name must still select this tap's local formula.
-          brew info --json=v2 tvr-works/tap/xkcdpass | jq -e '.formulae | length == 1 and .[0].tap == "tvr-works/tap"' >/dev/null
-          brew install --build-from-source tvr-works/tap/xkcdpass 2>&1 | tee "${RUNNER_TEMP}/xkcdpass-install.log"
-          brew test tvr-works/tap/xkcdpass 2>&1 | tee "${RUNNER_TEMP}/xkcdpass-test.log"
-          brew uninstall tvr-works/tap/xkcdpass
+          .github/scripts/test-package-install.sh formula tvr-works/tap/xkcdpass 2>&1 | tee "${RUNNER_TEMP}/xkcdpass-install.log"
       - name: Verify canonical release metadata and both archives
         if: runner.os == 'macOS'
         working-directory: ${{ steps.homebrew.outputs.repository-path }}
