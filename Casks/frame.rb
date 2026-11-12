@@ -1,6 +1,6 @@
 cask "frame" do
-  version "3.2.0"
-  sha256 "840da5ded27fc57505b1c92d23e2826fb42103c3a7661699fb74e09bb718978d"
+  version "3.2.1"
+  sha256 "53c3f0b806646cd2eadfc4626aceb78782da709d865e854f9575d4de16fd9175"
 
   url "https://github.com/tvr-works/frame/releases/download/v#{version}/Frame-v#{version}.zip"
   name "Frame"
