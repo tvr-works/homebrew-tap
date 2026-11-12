@@ -15,15 +15,6 @@ printf 'migration-config-marker\n' > "$XDG_CONFIG_HOME/frame/.frame.toml"
 tap_root="$(pwd)"
 scripts="${tap_root}/.github/scripts"
 "${scripts}/check-homebrew-api.sh"
-candidate="$(brew info --json=v2 --cask tvr-works/tap/frame)"
-version="$(jq -er '.casks[0].version' <<<"${candidate}")"
-url="$(jq -er '.casks[0].url' <<<"${candidate}")"
-sha="$(jq -er '.casks[0].sha256' <<<"${candidate}")"
-assert_destination() {
-  "${scripts}/check-package-state.sh" --exact cask tvr-works/tap/frame \
-    "${version}" "${url}" "${sha}" "${RUNNER_TEMP}/frame-selected-state"
-}
-assert_destination
 fixture="$RUNNER_TEMP/frame-legacy-tap-fixture"
 remote="$RUNNER_TEMP/frame-legacy-tap-origin.git"
 report="$RUNNER_TEMP/frame-migration-report.txt"
@@ -44,6 +35,15 @@ if brew command trust >/dev/null 2>&1; then
   brew trust --cask tvanreenen/tap/frame
   brew trust --cask tvr-works/tap/frame
 fi
+candidate="$(brew info --json=v2 --cask tvr-works/tap/frame)"
+version="$(jq -er '.casks[0].version' <<<"${candidate}")"
+url="$(jq -er '.casks[0].url' <<<"${candidate}")"
+sha="$(jq -er '.casks[0].sha256' <<<"${candidate}")"
+assert_destination() {
+  "${scripts}/check-package-state.sh" --exact cask tvr-works/tap/frame \
+    "${version}" "${url}" "${sha}" "${RUNNER_TEMP}/frame-selected-state"
+}
+assert_destination
 owned_install=false
 cleanup() {
   if [[ "$owned_install" == true ]]; then
