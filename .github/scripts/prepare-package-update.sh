@@ -32,6 +32,18 @@ then
 fi
 
 case "${package}" in
+  frame)
+    repository="tvr-works/frame"
+    kind="cask"
+    token="frame"
+    tap_path="Casks/frame.rb"
+    [[ "${version}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] ||
+      fail "frame requires a stable v-prefixed Semantic Version"
+    formula_version="${version#v}"
+    target_asset="Frame-${version}.zip"
+    checksummed_assets=("${target_asset}")
+    expected_assets=("checksums.txt" "${target_asset}")
+    ;;
   xkcdpass)
     repository="tvr-works/xkcdpass"
     kind="formula"
@@ -91,6 +103,13 @@ if [[ "${package}" == "xkcdpass" ]]; then
   jq -e --arg url "https://github.com/${repository}/releases/tag/${version}" '
     .html_url == $url and .immutable == true
   ' "${release_json}" >/dev/null || fail "xkcdpass release identity or immutability is invalid"
+fi
+
+if [[ "${package}" == "frame" ]]; then
+  # Existing Frame releases predate enforced GitHub immutability. Preserve their
+  # bytes and qualify canonical metadata, API digests, manifest and signatures.
+  jq -e --arg url "https://github.com/${repository}/releases/tag/${version}" \
+    '.html_url == $url' "${release_json}" >/dev/null || fail "frame release identity is invalid"
 fi
 
 actual_assets="$(jq -r '.assets[].name' "${release_json}" | LC_ALL=C sort)"
@@ -181,6 +200,11 @@ do
 done
 
 case "${package}" in
+  frame)
+    release_commit="$(gh api -H "${api_header}" "repos/${repository}/commits/${version}" --jq '.sha')"
+    [[ "${release_commit}" =~ ^[0-9a-f]{40}$ ]] || fail "frame release tag did not resolve to a commit"
+    "$(dirname "$0")/verify-frame-package.sh" "${release_dir}/${target_asset}" "${version}" "${release_commit}" "${release_dir}/extracted"
+    ;;
   xkcdpass)
     extract_dir="${release_dir}/extracted"
     mkdir "${extract_dir}"

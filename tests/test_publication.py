@@ -164,7 +164,7 @@ else:
 
     def test_rejects_other_packages(self):
         self.fixture()
-        for package in ["frame", "unknown"]:
+        for package in ["unknown"]:
             result, output = self.run_verification(package)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("unsupported package", result.stderr)
@@ -186,6 +186,39 @@ else:
                 else:
                     self.release["draft"] = True
                 result, output = self.run_verification()
+                self.assertNotEqual(result.returncode, 0, failure)
+                self.assertFalse(output.exists())
+
+    def test_frame_rejects_bad_release_evidence(self):
+        for failure in ["old_owner", "extra_asset", "duplicate_checksum", "digest", "draft", "prerelease"]:
+            with self.subTest(failure=failure):
+                self.repository = "tvr-works/frame"
+                self.version = "v3.2.0"
+                self.asset = "Frame-v3.2.0.zip"
+                (self.root / self.asset).write_bytes(b"archive fixture")
+                digest = hashlib.sha256((self.root / self.asset).read_bytes()).hexdigest()
+                (self.root / "checksums.txt").write_text(f"{digest}  {self.asset}\n")
+                self.release = {
+                    "tag_name": self.version, "draft": False, "prerelease": False,
+                    "published_at": "2026-11-11T00:00:00Z", "immutable": False,
+                    "html_url": f"https://github.com/{self.repository}/releases/tag/{self.version}",
+                    "assets": [self.metadata(n) for n in ["checksums.txt", self.asset]],
+                }
+                if failure == "old_owner":
+                    self.release["html_url"] = self.release["html_url"].replace("tvr-works", "tvanreenen")
+                elif failure == "extra_asset":
+                    self.release["assets"].append(dict(self.release["assets"][0], name="extra"))
+                elif failure == "duplicate_checksum":
+                    path = self.root / "checksums.txt"
+                    path.write_text(path.read_text() * 2)
+                    self.release["assets"][0] = self.metadata("checksums.txt")
+                elif failure == "digest":
+                    self.release["assets"][1]["digest"] = "sha256:" + "0" * 64
+                elif failure == "draft":
+                    self.release["draft"] = True
+                else:
+                    self.release["prerelease"] = True
+                result, output = self.run_verification("frame")
                 self.assertNotEqual(result.returncode, 0, failure)
                 self.assertFalse(output.exists())
 
