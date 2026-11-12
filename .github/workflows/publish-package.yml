@@ -72,6 +72,10 @@ jobs:
           cask: false
           stable: true
 
+      - name: Prepare API-only Homebrew baseline
+        working-directory: ${{ steps.homebrew.outputs.repository-path }}
+        run: .github/scripts/prepare-homebrew-api.sh
+
       - name: Record the verified base commit
         id: base
         working-directory: ${{ steps.homebrew.outputs.repository-path }}

@@ -29,6 +29,10 @@ jobs:
           cask: false
           stable: true
 
+      - name: Prepare API-only Homebrew baseline
+        working-directory: ${{ steps.homebrew.outputs.repository-path }}
+        run: .github/scripts/prepare-homebrew-api.sh
+
       - name: Install Homebrew style dependencies
         working-directory: ${{ steps.homebrew.outputs.repository-path }}
         run: brew install-bundler-gems --groups=style
@@ -104,6 +108,9 @@ jobs:
           core: false
           cask: false
           stable: true
+      - name: Prepare API-only Homebrew baseline
+        working-directory: ${{ steps.homebrew.outputs.repository-path }}
+        run: .github/scripts/prepare-homebrew-api.sh
       - name: Install published archive and test runtime
         working-directory: ${{ steps.homebrew.outputs.repository-path }}
         run: |
