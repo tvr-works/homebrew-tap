@@ -51,10 +51,10 @@ cleanup() {
   fi
 }
 trap cleanup EXIT
-owned_install=true
 "${scripts}/check-package-state.sh" --exact cask tvanreenen/tap/frame \
-  "${version}" "${url/github.com\/tvr-works/github.com\/tvanreenen}" "${sha}" "${RUNNER_TEMP}/frame-legacy-state"
+  "${version}" "${url/tvr-works/tvanreenen}" "${sha}" "${RUNNER_TEMP}/frame-legacy-state"
 echo 'Migration: installing the legacy fixture'
+owned_install=true
 brew install --cask tvanreenen/tap/frame
 receipt="$(find "$(brew --caskroom)/frame" -name INSTALL_RECEIPT.json -type f)"
 [[ -f "$receipt" ]]
