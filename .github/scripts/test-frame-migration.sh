@@ -46,7 +46,8 @@ brew install --cask tvanreenen/tap/frame
 receipt="$(find "$(brew --caskroom)/frame" -name INSTALL_RECEIPT.json -type f)"
 [[ -f "$receipt" ]]
 [[ "$(jq -r '.source.tap' "$receipt")" == tvanreenen/tap ]]
-app=/Applications/Frame.app/Contents/MacOS/Frame
+app_executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' /Applications/Frame.app/Contents/Info.plist)"
+app="/Applications/Frame.app/Contents/MacOS/$app_executable"
 cli="$(brew --prefix)/bin/frame"
 shasum -a 256 "$app" "$cli" > "$RUNNER_TEMP/frame-before.sha256"
 
