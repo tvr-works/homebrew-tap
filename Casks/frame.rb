@@ -14,5 +14,9 @@ cask "frame" do
   depends_on macos: :ventura
 
   app "Frame-v#{version}/Frame.app"
-  binary "Frame-v#{version}/bin/frame"
+  if Version.new(version) >= Version.new("3.3.0")
+    binary "#{appdir}/Frame.app/Contents/MacOS/frame", target: "frame"
+  else
+    binary "Frame-v#{version}/bin/frame"
+  end
 end
