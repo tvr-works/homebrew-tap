@@ -119,6 +119,10 @@ echo 'Installed receipt now names tvr-works/tap; preserved app/CLI bytes match.'
 echo 'Migration: uninstall preparation and removal'
 brew uninstall --cask tvr-works/tap/frame
 echo 'Migration: fresh destination installation'
+# Uninstall removes per-cask trust; approve the next isolated installation again.
+if brew command trust >/dev/null 2>&1; then
+  brew trust --cask tvr-works/tap/frame
+fi
 assert_destination
 owned_install=true
 brew install --cask tvr-works/tap/frame
